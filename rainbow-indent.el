@@ -13,11 +13,18 @@
 ;; The default color scheme isn't really a rainbow, more of a grayscale gradient,
 ;; so perhaps "rainbow" indents are a bit of a misnomer.
 ;;
+;; Better color schemes can be defined as elisp functions taking a single parameter
+;; `depth', and assigned to the variable `rainbow-indent-color-function'.  Grayscale
+;; happens to work for me, so I haven't bothered adding any others.
+;;
 ;; This is mostly useful for indentation-based languages like coffeescript or
 ;; python.
 ;; 
 ;; The best way to use this library is probably to add the rainbow-mode-hook to
 ;; whatever major mode hook you're using.
+
+;; Note that rainbow-mode-hook requires lexical-binding to work and will thus
+;; only work on Emacs 24 or later.
 
 ;;; Code:
 
@@ -25,6 +32,7 @@
   (apply 'concat "#" (mapcar (lambda (x) (format "%02x" x)) (list r g b))))
 
 (defun rainbow-indent-grayscale (depth)
+  "A discretized gradient that fades in from white."
   (let ((c (* (- 15 (/ (min depth 30) 2)) #x11)))
     (rainbow-indent-hexcolor c c c)))
 
@@ -39,8 +47,9 @@
         (set-text-properties
          (+ i (line-beginning-position))
          (+ i (line-beginning-position) 1)
-         `(font-lock-face (:background ,(funcall rainbow-indent-color-function i))
-                          rear-nonsticky t))))))
+         `(font-lock-face 
+           (:background ,(funcall rainbow-indent-color-function i))
+           rear-nonsticky t))))))
 
 (defun rainbow-indent-all ()
   "Rainbow indent ALL the THINGS."
